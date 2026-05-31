@@ -18,10 +18,7 @@
     min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bordo-dark);
   }
   #pantalla-token { display: none; }
-
-  .login-box {
-    background: var(--blanco); padding: 2.5rem 2.2rem; width: 100%; max-width: 360px; border-top: 4px solid var(--bordo-light);
-  }
+  .login-box { background: var(--blanco); padding: 2.5rem 2.2rem; width: 100%; max-width: 360px; border-top: 4px solid var(--bordo-light); }
   .login-box h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; letter-spacing: 0.18em; color: var(--bordo-dark); margin-bottom: 0.2rem; }
   .login-box p.sub { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1.8rem; }
   .login-box label { display: block; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--azul); font-weight: 600; margin-bottom: 0.4rem; }
@@ -33,7 +30,6 @@
   .token-hint { font-size: 0.72rem; color: var(--muted); margin-top: 1rem; line-height: 1.6; }
 
   #pantalla-admin { display: none; }
-
   header { background: var(--bordo-dark); border-bottom: 3px solid var(--bordo-light); padding: 1.6rem 2rem; display: flex; align-items: center; justify-content: space-between; }
   header .logo { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; letter-spacing: 0.18em; color: var(--blanco); text-decoration: none; }
   header .badge { background: var(--bordo-light); color: var(--blanco); font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 3px 10px; margin-left: 0.8rem; vertical-align: middle; }
@@ -75,18 +71,12 @@
   .btn-borrar-nota:hover { color: var(--bordo); }
   .lista-empty { font-size: 0.85rem; color: #bbb; font-style: italic; padding: 1rem 0; }
   .badge-total { background: var(--azul); color: #fff; font-size: 0.65rem; padding: 2px 7px; margin-left: 0.5rem; vertical-align: middle; }
-
   footer { border-top: 1px solid var(--gris); text-align: center; padding: 1.2rem; font-size: 0.7rem; color: #ccc; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2rem; }
-
-  @media (max-width: 700px) {
-    .admin-layout { grid-template-columns: 1fr; }
-    header { padding: 1.2rem 1rem; }
-  }
+  @media (max-width: 700px) { .admin-layout { grid-template-columns: 1fr; } header { padding: 1.2rem 1rem; } }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="pantalla-login">
   <div class="login-box">
     <h1>Radio Sooh</h1>
@@ -98,7 +88,6 @@
   </div>
 </div>
 
-<!-- TOKEN SETUP -->
 <div id="pantalla-token">
   <div class="login-box">
     <h1>Radio Sooh</h1>
@@ -106,19 +95,18 @@
     <label for="inp-token">Token de GitHub</label>
     <input type="text" id="inp-token" placeholder="ghp_...">
     <button onclick="guardarToken()">Guardar y continuar</button>
-    <p class="token-hint">Necesitás un token con permiso <strong>repo</strong>. Se guarda en este navegador y no tenés que volver a ingresarlo.</p>
+    <p class="token-hint">Necesitás un token con permiso <strong>repo</strong>. Se guarda en este navegador.</p>
   </div>
 </div>
 
-<!-- PANEL ADMIN -->
 <div id="pantalla-admin">
   <header>
     <div>
-      <a href="index.html" class="logo">Radio Sooh</a>
+      <a href="../index.html" class="logo">Radio Sooh</a>
       <span class="badge">Admin</span>
     </div>
     <div class="header-right">
-      <a href="index.html" class="btn-ver-sitio" target="_blank">Ver sitio</a>
+      <a href="../index.html" class="btn-ver-sitio" target="_blank">Ver sitio</a>
       <button class="btn-salir" onclick="salir()">Salir</button>
     </div>
   </header>
@@ -167,14 +155,17 @@
   const REPO = 'radio-sooh/radio-sooh.github.io';
   const ARCHIVO = 'noticias.json';
   const TOKEN_KEY = 'rs_token';
+  const BASE_URL = 'https://radio-sooh.github.io';
 
   function getToken() { return localStorage.getItem(TOKEN_KEY) || ''; }
   function formatFecha(ts) { return new Date(ts).toLocaleDateString('es-AR', { day:'numeric', month:'long', year:'numeric' }); }
 
   function generarSlug(titulo) {
+    const map = {á:'a',à:'a',ä:'a',â:'a',é:'e',è:'e',ë:'e',ê:'e',í:'i',ì:'i',ï:'i',î:'i',ó:'o',ò:'o',ö:'o',ô:'o',ú:'u',ù:'u',ü:'u',û:'u',ñ:'n',ç:'c'};
     return titulo.toLowerCase().trim()
+      .replace(/[áàäâéèëêíìïîóòöôúùüûñç]/g, c => map[c] || c)
       .replace(/\s+/g, '_')
-      .replace(/[^a-z0-9ñáéíóúüàèìòù_]/g, '')
+      .replace(/[^a-z0-9_]/g, '')
       .replace(/_+/g, '_')
       .replace(/^_|_$/g, '');
   }
@@ -182,8 +173,12 @@
   function actualizarSlug() {
     const slug = generarSlug(document.getElementById('inp-titulo').value);
     document.getElementById('slug-display').textContent = slug
-      ? 'nota.html?slug=' + slug
+      ? BASE_URL + '/notas/' + slug + '.html'
       : 'Se genera del título...';
+  }
+
+  function esc(s) {
+    return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
   function decodeB64(b64) {
@@ -200,58 +195,105 @@
     return btoa(bin);
   }
 
-  async function fetchNoticiasAPI() {
-    const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${ARCHIVO}`, {
+  async function apiGet(path) {
+    const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
       headers: { Authorization: `token ${getToken()}`, Accept: 'application/vnd.github+json' }
     });
-    if (!res.ok) throw new Error('No se pudo acceder al repositorio. Verificá el token.');
-    const data = await res.json();
+    if (!res.ok) return null;
+    return res.json();
+  }
+
+  async function apiPut(path, b64content, sha, msg) {
+    const body = { message: msg, content: b64content };
+    if (sha) body.sha = sha;
+    const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+      method: 'PUT',
+      headers: { Authorization: `token ${getToken()}`, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.message); }
+    return res.json();
+  }
+
+  async function apiDelete(path, sha, msg) {
+    const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+      method: 'DELETE',
+      headers: { Authorization: `token ${getToken()}`, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg, sha })
+    });
+    return res.ok;
+  }
+
+  async function fetchNoticiasAPI() {
+    const data = await apiGet(ARCHIVO);
+    if (!data) throw new Error('No se pudo acceder al repositorio. Verificá el token.');
     return { sha: data.sha, noticias: JSON.parse(decodeB64(data.content)) };
   }
 
   async function guardarNoticiasAPI(noticias, sha) {
-    const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${ARCHIVO}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `token ${getToken()}`,
-        Accept: 'application/vnd.github+json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: 'Actualizar noticias',
-        content: encodeB64(JSON.stringify(noticias, null, 2)),
-        sha
-      })
-    });
-    if (!res.ok) { const e = await res.json(); throw new Error(e.message); }
+    await apiPut(ARCHIVO, encodeB64(JSON.stringify(noticias, null, 2)), sha, 'Actualizar noticias');
   }
 
-  function intentarLogin() {
-    if (document.getElementById('inp-pass').value === PASS) {
-      sessionStorage.setItem('rs_auth', '1');
-      if (getToken()) {
-        mostrarAdmin();
-      } else {
-        document.getElementById('pantalla-login').style.display = 'none';
-        document.getElementById('pantalla-token').style.display = 'flex';
-      }
-    } else {
-      document.getElementById('login-error').style.display = 'block';
-      document.getElementById('inp-pass').value = '';
-      document.getElementById('inp-pass').focus();
-    }
-  }
-
-  function guardarToken() {
-    const token = document.getElementById('inp-token').value.trim();
-    if (!token) { alert('Ingresá el token.'); return; }
-    localStorage.setItem(TOKEN_KEY, token);
-    mostrarAdmin();
-  }
-
-  function salir() {
-    sessionStorage.removeItem('rs_auth');
-    location.reload();
+  function generarHtmlNota(n) {
+    const fecha = formatFecha(n.id);
+    const imgTag = n.imagen ? `<img class="nota-imagen" src="${esc(n.imagen)}" alt="${esc(n.titulo)}">` : '';
+    const ogImg = n.imagen ? `<meta property="og:image" content="${esc(n.imagen)}">` : '';
+    return `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${esc(n.titulo)} — Radio Sooh</title>
+<meta property="og:title" content="${esc(n.titulo)}">
+<meta property="og:description" content="${esc(n.bajada)}">
+${ogImg}
+<meta property="og:url" content="${BASE_URL}/notas/${n.slug}.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Radio Sooh">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${esc(n.titulo)}">
+<meta name="twitter:description" content="${esc(n.bajada)}">
+${n.imagen ? `<meta name="twitter:image" content="${esc(n.imagen)}">` : ''}
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Sans+3:wght@300;400;600&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--bordo:#6B1A2A;--bordo-dark:#4A1019;--bordo-light:#9B2A3E;--azul:#1B3A5C;--azul-mid:#2E5F8A;--blanco:#FAF9F7;--gris:#E8E4DF;--texto:#1a1a1a;--muted:#666}
+  body{font-family:'Source Sans 3',sans-serif;background:var(--blanco);color:var(--texto);min-height:100vh}
+  header{background:var(--bordo-dark);border-bottom:3px solid var(--bordo-light);padding:2.2rem 1rem 1.6rem;text-align:center}
+  header a{text-decoration:none}
+  header h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(3.5rem,10vw,6.5rem);font-weight:400;color:var(--blanco);letter-spacing:0.18em;line-height:1}
+  header .subtitulo{margin-top:0.5rem;font-size:clamp(0.7rem,1.8vw,0.82rem);font-weight:300;color:rgba(250,249,247,0.55);letter-spacing:0.28em;text-transform:uppercase;font-style:italic}
+  nav{background:var(--azul);display:flex;align-items:center;padding:0 2rem;height:44px}
+  nav a{color:rgba(250,249,247,0.75);text-decoration:none;font-size:0.78rem;letter-spacing:0.15em;text-transform:uppercase;padding:0 1.2rem;height:44px;display:flex;align-items:center}
+  nav a:hover{color:var(--blanco)}
+  main{max-width:760px;margin:0 auto;padding:2.5rem 1.5rem}
+  .nota-imagen{width:100%;max-height:420px;object-fit:cover;display:block;margin-bottom:1.8rem}
+  .nota-titulo{font-family:'Lora',serif;font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;color:var(--azul);line-height:1.2;margin-bottom:0.6rem}
+  .nota-bajada{font-size:1.05rem;color:var(--muted);line-height:1.6;margin-bottom:0.8rem;font-style:italic;border-left:3px solid var(--bordo);padding-left:1rem}
+  .nota-meta{font-size:0.78rem;color:#aaa;margin-bottom:1.8rem;padding-bottom:1.4rem;border-bottom:1px solid var(--gris)}
+  .nota-cuerpo{font-size:1.05rem;line-height:1.85;color:#333;white-space:pre-wrap}
+  footer{border-top:1px solid var(--gris);text-align:center;padding:1.5rem;font-size:0.72rem;color:#bbb;letter-spacing:0.1em;text-transform:uppercase;margin-top:3rem}
+  footer span{color:var(--bordo)}
+</style>
+</head>
+<body>
+<header>
+  <a href="../index.html">
+    <h1>Radio Sooh</h1>
+    <p class="subtitulo">Donde las noticias llegan solas y nadie las pidió</p>
+  </a>
+</header>
+<nav><a href="../index.html">← Inicio</a></nav>
+<main>
+  ${imgTag}
+  <h1 class="nota-titulo">${esc(n.titulo)}</h1>
+  ${n.bajada ? `<p class="nota-bajada">${esc(n.bajada)}</p>` : ''}
+  <p class="nota-meta">${fecha}</p>
+  <div class="nota-cuerpo">${esc(n.cuerpo)}</div>
+</main>
+<footer><span>Radio Sooh</span> &nbsp;·&nbsp; Misiones, Argentina</footer>
+</body>
+</html>`;
   }
 
   function comprimirImagen(file, callback) {
@@ -259,14 +301,14 @@
     reader.onload = e => {
       const img = new Image();
       img.onload = () => {
-        const MAX = 900;
+        const MAX = 1200;
         let w = img.width, h = img.height;
         if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
         if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
         const canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
         canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        callback(canvas.toDataURL('image/jpeg', 0.75));
+        callback(canvas.toDataURL('image/jpeg', 0.82));
       };
       img.src = e.target.result;
     };
@@ -289,18 +331,34 @@
     const bajada = document.getElementById('inp-bajada').value.trim();
     const cuerpo = document.getElementById('inp-cuerpo').value.trim();
     const preview = document.getElementById('upload-preview');
-    const imagen = preview.style.display !== 'none' ? preview.src : '';
+    const tieneImagen = preview.style.display !== 'none' && preview.src;
     if (!titulo) { alert('El título es obligatorio.'); return; }
 
     const btn = document.getElementById('btn-publicar');
     btn.disabled = true; btn.textContent = 'Publicando...';
+
     try {
       const { sha, noticias } = await fetchNoticiasAPI();
       let slug = generarSlug(titulo);
       if (!slug) slug = 'nota_' + Date.now();
       if (noticias.some(n => n.slug === slug)) slug += '_' + Date.now().toString().slice(-4);
 
-      noticias.unshift({ id: Date.now(), slug, titulo, bajada, cuerpo, imagen });
+      let imgUrl = '';
+      if (tieneImagen) {
+        btn.textContent = 'Subiendo imagen...';
+        const dataUrl = preview.src;
+        const imgB64 = dataUrl.split(',')[1];
+        await apiPut(`img/${slug}.jpg`, imgB64, null, 'Imagen: ' + slug);
+        imgUrl = BASE_URL + '/img/' + slug + '.jpg';
+      }
+
+      btn.textContent = 'Generando página...';
+      const nota = { id: Date.now(), slug, titulo, bajada, cuerpo, imagen: imgUrl };
+      const htmlNota = generarHtmlNota(nota);
+      await apiPut(`notas/${slug}.html`, encodeB64(htmlNota), null, 'Nota: ' + titulo);
+
+      btn.textContent = 'Guardando...';
+      noticias.unshift(nota);
       await guardarNoticiasAPI(noticias, sha);
 
       document.getElementById('inp-titulo').value = '';
@@ -312,7 +370,7 @@
       document.getElementById('slug-display').textContent = 'Se genera del título...';
 
       renderLista();
-      alert('¡Nota publicada!\nLink: https://radio-sooh.github.io/nota.html?slug=' + slug);
+      alert('¡Nota publicada!\nLink: ' + BASE_URL + '/notas/' + slug + '.html');
     } catch(e) {
       alert('Error al publicar: ' + e.message);
     }
@@ -323,12 +381,46 @@
     if (!confirm('¿Eliminar esta nota?')) return;
     try {
       const { sha, noticias } = await fetchNoticiasAPI();
+      const nota = noticias.find(n => n.slug === slug);
+
+      const htmlFile = await apiGet(`notas/${slug}.html`);
+      if (htmlFile) await apiDelete(`notas/${slug}.html`, htmlFile.sha, 'Eliminar nota: ' + slug);
+
+      if (nota && nota.imagen) {
+        const imgFile = await apiGet(`img/${slug}.jpg`);
+        if (imgFile) await apiDelete(`img/${slug}.jpg`, imgFile.sha, 'Eliminar imagen: ' + slug);
+      }
+
       await guardarNoticiasAPI(noticias.filter(n => n.slug !== slug), sha);
       renderLista();
     } catch(e) {
       alert('Error al eliminar: ' + e.message);
     }
   }
+
+  function intentarLogin() {
+    if (document.getElementById('inp-pass').value === PASS) {
+      sessionStorage.setItem('rs_auth', '1');
+      if (getToken()) mostrarAdmin();
+      else {
+        document.getElementById('pantalla-login').style.display = 'none';
+        document.getElementById('pantalla-token').style.display = 'flex';
+      }
+    } else {
+      document.getElementById('login-error').style.display = 'block';
+      document.getElementById('inp-pass').value = '';
+      document.getElementById('inp-pass').focus();
+    }
+  }
+
+  function guardarToken() {
+    const token = document.getElementById('inp-token').value.trim();
+    if (!token) { alert('Ingresá el token.'); return; }
+    localStorage.setItem(TOKEN_KEY, token);
+    mostrarAdmin();
+  }
+
+  function salir() { sessionStorage.removeItem('rs_auth'); location.reload(); }
 
   async function mostrarAdmin() {
     document.getElementById('pantalla-login').style.display = 'none';
@@ -344,20 +436,17 @@
     try {
       const { noticias } = await fetchNoticiasAPI();
       badge.textContent = noticias.length;
-      if (noticias.length === 0) {
-        cont.innerHTML = '<p class="lista-empty">Sin notas publicadas todavía.</p>';
-        return;
-      }
+      if (noticias.length === 0) { cont.innerHTML = '<p class="lista-empty">Sin notas publicadas todavía.</p>'; return; }
       cont.innerHTML = noticias.map(n => `
         <div class="nota-item">
           <div class="nota-item-info">
-            <div class="nota-item-titulo">${n.titulo}</div>
+            <div class="nota-item-titulo">${esc(n.titulo)}</div>
             <div class="nota-item-meta">
               ${formatFecha(n.id)} &nbsp;·&nbsp;
-              <a href="nota.html?slug=${n.slug}" target="_blank">${n.slug}</a>
+              <a href="../notas/${n.slug}.html" target="_blank">${n.slug}</a>
             </div>
           </div>
-          ${n.imagen ? `<img class="nota-item-thumb" src="${n.imagen}" alt="">` : ''}
+          ${n.imagen ? `<img class="nota-item-thumb" src="${esc(n.imagen)}" alt="">` : ''}
           <button class="btn-borrar-nota" onclick="borrar('${n.slug}')" title="Eliminar">×</button>
         </div>
       `).join('');
