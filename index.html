@@ -13,20 +13,13 @@
     --blanco: #FAF9F7; --gris: #E8E4DF; --texto: #1a1a1a; --muted: #666;
   }
   body { font-family: 'Source Sans 3', sans-serif; background: var(--blanco); color: var(--texto); min-height: 100vh; }
-
   header { background: var(--bordo-dark); border-bottom: 3px solid var(--bordo-light); padding: 2.2rem 1rem 1.6rem; text-align: center; }
   header h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3.5rem, 10vw, 6.5rem); font-weight: 400; color: var(--blanco); letter-spacing: 0.18em; line-height: 1; }
   header .subtitulo { margin-top: 0.5rem; font-size: clamp(0.7rem, 1.8vw, 0.82rem); font-weight: 300; color: rgba(250,249,247,0.55); letter-spacing: 0.28em; text-transform: uppercase; font-style: italic; }
-
-  nav { background: var(--azul); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 44px; }
-  nav .nav-links { display: flex; }
+  nav { background: var(--azul); display: flex; align-items: center; padding: 0 2rem; height: 44px; }
   nav a { color: rgba(250,249,247,0.75); text-decoration: none; font-size: 0.78rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0 1.2rem; height: 44px; display: flex; align-items: center; border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); }
   nav a.active { color: var(--blanco); background: rgba(255,255,255,0.08); }
-
-
-
   main { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; }
-
   .noticia-destacada { border-top: 3px solid var(--bordo); padding-top: 1.5rem; margin-bottom: 2.5rem; display: grid; grid-template-columns: 1fr; gap: 0; }
   .noticia-destacada.con-imagen { grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
   .destacada-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
@@ -35,9 +28,7 @@
   .noticia-destacada h2:hover { color: var(--bordo); }
   .noticia-destacada .bajada { font-size: 1rem; color: var(--muted); line-height: 1.6; margin-bottom: 0.8rem; }
   .noticia-destacada .meta { font-size: 0.75rem; color: #999; }
-
   .divisor { border: none; border-top: 1px solid var(--gris); margin: 0 0 2rem; }
-
   .grid-noticias { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0; border-top: 1px solid var(--gris); }
   .noticia-card { padding: 1.4rem 1.2rem 1.4rem 0; border-bottom: 1px solid var(--gris); position: relative; }
   .noticia-card:nth-child(odd) { border-right: 1px solid var(--gris); padding-right: 1.4rem; }
@@ -46,25 +37,10 @@
   .noticia-card h3:hover { color: var(--bordo); }
   .noticia-card p { font-size: 0.875rem; color: var(--muted); line-height: 1.55; margin-bottom: 0.7rem; }
   .noticia-card .meta { font-size: 0.7rem; color: #aaa; }
-
   .empty { text-align: center; padding: 4rem 1rem; color: #bbb; }
   .empty p { font-size: 0.9rem; margin-top: 0.5rem; font-style: italic; }
-
-  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 100; align-items: center; justify-content: center; padding: 1rem; }
-  .overlay.open { display: flex; }
-  .modal { background: var(--blanco); width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; border-top: 4px solid var(--bordo); }
-  .modal-header { padding: 1.4rem 1.8rem 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gris); }
-  .modal-header h3 { font-family: 'Lora', serif; font-size: 1.1rem; color: var(--azul); }
-  .modal-header button { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--muted); line-height: 1; }
-  .modal-body { padding: 1.5rem 1.8rem; }
-  .leer-imagen { width: 100%; max-height: 300px; object-fit: cover; display: block; margin-bottom: 1.2rem; }
-  .leer-titulo { font-family: 'Lora', serif; font-size: 1.7rem; font-weight: 700; color: var(--azul); line-height: 1.25; margin-bottom: 0.5rem; }
-  .leer-meta { font-size: 0.75rem; color: #aaa; margin-bottom: 1.2rem; padding-bottom: 1.2rem; border-bottom: 1px solid var(--gris); }
-  .leer-cuerpo { font-size: 1rem; line-height: 1.75; color: #333; white-space: pre-wrap; }
-
   footer { border-top: 1px solid var(--gris); text-align: center; padding: 1.5rem; font-size: 0.72rem; color: #bbb; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 3rem; }
   footer span { color: var(--bordo); }
-
   @media (max-width: 600px) {
     nav { padding: 0 0.8rem; }
     main { padding: 1.5rem 1rem; }
@@ -81,81 +57,54 @@
 </header>
 
 <nav>
-  <div class="nav-links">
-    <a href="#" class="active">Todas</a>
-  </div>
-
+  <a href="#" class="active">Todas</a>
 </nav>
 
-<main id="main-content"></main>
+<main id="main-content">
+  <div class="empty"><p>Cargando...</p></div>
+</main>
 
 <footer><span>Radio Sooh</span> &nbsp;·&nbsp; Misiones, Argentina</footer>
 
-<!-- MODAL LEER -->
-<div class="overlay" id="overlay-leer">
-  <div class="modal">
-    <div class="modal-header">
-      <h3 style="font-family:'Source Sans 3',sans-serif;font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--azul-mid);">Radio Sooh</h3>
-      <button onclick="cerrarLeer()">×</button>
-    </div>
-    <div class="modal-body">
-      <img id="leer-imagen" class="leer-imagen" src="" alt="" style="display:none">
-      <p class="leer-titulo" id="leer-titulo"></p>
-      <p class="leer-meta" id="leer-meta"></p>
-      <div class="leer-cuerpo" id="leer-cuerpo"></div>
-    </div>
-  </div>
-</div>
-
 <script>
-  const CLAVE = 'radiosooh_noticias';
-  function cargar() { try { return JSON.parse(localStorage.getItem(CLAVE)) || []; } catch { return []; } }
+  function ir(slug) { window.location.href = 'nota.html?slug=' + slug; }
   function formatFecha(ts) { return new Date(ts).toLocaleDateString('es-AR', { day:'numeric', month:'long', year:'numeric' }); }
 
-  function render() {
-    const noticias = cargar();
+  async function render() {
     const main = document.getElementById('main-content');
-    if (noticias.length === 0) {
-      main.innerHTML = `<div class="empty"><strong>Sin noticias por ahora.</strong><p>Volvé pronto.</p></div>`;
-      return;
+    try {
+      const res = await fetch('noticias.json?_=' + Date.now());
+      const noticias = await res.json();
+      if (noticias.length === 0) {
+        main.innerHTML = '<div class="empty"><strong>Sin noticias por ahora.</strong><p>Volvé pronto.</p></div>';
+        return;
+      }
+      const [primera, ...resto] = noticias;
+      let html = `<div class="noticia-destacada ${primera.imagen ? 'con-imagen' : ''}">`;
+      if (primera.imagen) html += `<img class="destacada-img" src="${primera.imagen}" alt="${primera.titulo}">`;
+      html += `<div>
+        <span class="tag">&#9632; Destacada</span>
+        <h2 onclick="ir('${primera.slug}')">${primera.titulo}</h2>
+        <p class="bajada">${primera.bajada || ''}</p>
+        <span class="meta">${formatFecha(primera.id)}</span>
+      </div></div><hr class="divisor">`;
+      if (resto.length > 0) {
+        html += '<div class="grid-noticias">';
+        resto.forEach(n => {
+          html += `<div class="noticia-card">
+            ${n.imagen ? `<img class="card-img" src="${n.imagen}" alt="${n.titulo}">` : ''}
+            <h3 onclick="ir('${n.slug}')">${n.titulo}</h3>
+            <p>${n.bajada || ''}</p>
+            <span class="meta">${formatFecha(n.id)}</span>
+          </div>`;
+        });
+        html += '</div>';
+      }
+      main.innerHTML = html;
+    } catch(e) {
+      main.innerHTML = '<div class="empty"><strong>No se pudieron cargar las noticias.</strong></div>';
     }
-    const [primera, ...resto] = noticias;
-    const tieneImg = primera.imagen;
-    let html = `<div class="noticia-destacada ${tieneImg ? 'con-imagen' : ''}">`;
-    if (tieneImg) html += `<img class="destacada-img" src="${primera.imagen}" alt="${primera.titulo}">`;
-    html += `<div><span class="tag">&#9632; Destacada</span>
-      <h2 onclick="leer(${primera.id})">${primera.titulo}</h2>
-      <p class="bajada">${primera.bajada || ''}</p>
-      <span class="meta">${formatFecha(primera.id)}</span>
-    </div></div><hr class="divisor">`;
-    if (resto.length > 0) {
-      html += `<div class="grid-noticias">`;
-      resto.forEach(n => {
-        const img = n.imagen ? `<img class="card-img" src="${n.imagen}" alt="${n.titulo}">` : '';
-        html += `<div class="noticia-card">${img}
-          <h3 onclick="leer(${n.id})">${n.titulo}</h3>
-          <p>${n.bajada || ''}</p>
-          <span class="meta">${formatFecha(n.id)}</span>
-        </div>`;
-      });
-      html += `</div>`;
-    }
-    main.innerHTML = html;
   }
-
-  function leer(id) {
-    const n = cargar().find(n => n.id === id);
-    if (!n) return;
-    const imgEl = document.getElementById('leer-imagen');
-    if (n.imagen) { imgEl.src = n.imagen; imgEl.style.display = 'block'; } else { imgEl.style.display = 'none'; }
-    document.getElementById('leer-titulo').textContent = n.titulo;
-    document.getElementById('leer-meta').textContent = formatFecha(n.id);
-    document.getElementById('leer-cuerpo').textContent = n.cuerpo || n.bajada || '';
-    document.getElementById('overlay-leer').classList.add('open');
-  }
-
-  function cerrarLeer() { document.getElementById('overlay-leer').classList.remove('open'); }
-  document.getElementById('overlay-leer').addEventListener('click', e => { if (e.target === e.currentTarget) cerrarLeer(); });
 
   render();
 </script>
