@@ -30,11 +30,11 @@
   .noticia-destacada .meta { font-size: 0.75rem; color: #999; }
   .divisor { border: none; border-top: 1px solid var(--gris); margin: 0 0 2rem; }
   .grid-noticias { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0; border-top: 1px solid var(--gris); }
-  .noticia-card { padding: 1.4rem 1.2rem 1.4rem 0; border-bottom: 1px solid var(--gris); position: relative; }
+  .noticia-card { padding: 1.4rem 1.2rem 1.4rem 0; border-bottom: 1px solid var(--gris); position: relative; cursor: pointer; }
   .noticia-card:nth-child(odd) { border-right: 1px solid var(--gris); padding-right: 1.4rem; }
   .card-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; margin-bottom: 0.8rem; display: block; }
-  .noticia-card h3 { font-family: 'Lora', serif; font-size: 1.05rem; font-weight: 700; line-height: 1.3; color: var(--texto); margin-bottom: 0.5rem; cursor: pointer; }
-  .noticia-card h3:hover { color: var(--bordo); }
+  .noticia-card h3 { font-family: 'Lora', serif; font-size: 1.05rem; font-weight: 700; line-height: 1.3; color: var(--texto); margin-bottom: 0.5rem; }
+  .noticia-card:hover h3 { color: var(--bordo); }
   .noticia-card p { font-size: 0.875rem; color: var(--muted); line-height: 1.55; margin-bottom: 0.7rem; }
   .noticia-card .meta { font-size: 0.7rem; color: #aaa; }
   .empty { text-align: center; padding: 4rem 1rem; color: #bbb; }
@@ -67,7 +67,7 @@
 <footer><span>Radio Sooh</span> &nbsp;·&nbsp; Misiones, Argentina</footer>
 
 <script>
-  function ir(slug) { window.location.href = 'nota.html?slug=' + slug; }
+  function ir(slug) { window.location.href = 'notas/' + slug + '.html'; }
   function formatFecha(ts) { return new Date(ts).toLocaleDateString('es-AR', { day:'numeric', month:'long', year:'numeric' }); }
 
   async function render() {
@@ -81,7 +81,7 @@
       }
       const [primera, ...resto] = noticias;
       let html = `<div class="noticia-destacada ${primera.imagen ? 'con-imagen' : ''}">`;
-      if (primera.imagen) html += `<img class="destacada-img" src="${primera.imagen}" alt="${primera.titulo}">`;
+      if (primera.imagen) html += `<img class="destacada-img" src="${primera.imagen}" alt="${primera.titulo}" onclick="ir('${primera.slug}')" style="cursor:pointer">`;
       html += `<div>
         <span class="tag">&#9632; Destacada</span>
         <h2 onclick="ir('${primera.slug}')">${primera.titulo}</h2>
@@ -91,9 +91,9 @@
       if (resto.length > 0) {
         html += '<div class="grid-noticias">';
         resto.forEach(n => {
-          html += `<div class="noticia-card">
+          html += `<div class="noticia-card" onclick="ir('${n.slug}')">
             ${n.imagen ? `<img class="card-img" src="${n.imagen}" alt="${n.titulo}">` : ''}
-            <h3 onclick="ir('${n.slug}')">${n.titulo}</h3>
+            <h3>${n.titulo}</h3>
             <p>${n.bajada || ''}</p>
             <span class="meta">${formatFecha(n.id)}</span>
           </div>`;
