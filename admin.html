@@ -67,7 +67,9 @@
   .nota-item-meta a { color: var(--azul-mid); text-decoration: none; }
   .nota-item-meta a:hover { text-decoration: underline; }
   .nota-item-thumb { width: 52px; height: 36px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--gris); }
-  .btn-borrar-nota { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1rem; padding: 2px 5px; flex-shrink: 0; transition: color 0.2s; line-height: 1; }
+  .nota-item-actions { display: flex; gap: 0.3rem; flex-shrink: 0; }
+  .btn-editar-nota, .btn-borrar-nota { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1rem; padding: 2px 5px; transition: color 0.2s; line-height: 1; }
+  .btn-editar-nota:hover { color: var(--azul-mid); }
   .btn-borrar-nota:hover { color: var(--bordo); }
   .lista-empty { font-size: 0.85rem; color: #bbb; font-style: italic; padding: 1rem 0; }
   .badge-total { background: var(--azul); color: #fff; font-size: 0.65rem; padding: 2px 7px; margin-left: 0.5rem; vertical-align: middle; }
@@ -113,7 +115,7 @@
 
   <div class="admin-layout">
     <div class="form-panel">
-      <h2>Nueva nota</h2>
+      <h2 id="form-titulo">Nueva nota</h2>
       <div class="campo">
         <label>Título</label>
         <input type="text" id="inp-titulo" placeholder="Titular de la nota..." oninput="actualizarSlug()">
@@ -139,6 +141,7 @@
         </div>
       </div>
       <button class="btn-publicar" id="btn-publicar" onclick="publicar()">Publicar nota</button>
+      <button class="btn-publicar" id="btn-cancelar" onclick="cancelarEdicion()" style="display:none;background:var(--azul);margin-top:0.5rem;">Cancelar edición</button>
     </div>
 
     <div class="lista-panel">
@@ -156,6 +159,7 @@
   const ARCHIVO = 'noticias.json';
   const TOKEN_KEY = 'rs_token';
   const BASE_URL = 'https://radio-sooh.github.io';
+  let editandoSlug = null;
 
   function getToken() { return localStorage.getItem(TOKEN_KEY) || ''; }
   function formatFecha(ts) { return new Date(ts).toLocaleDateString('es-AR', { day:'numeric', month:'long', year:'numeric' }); }
@@ -271,7 +275,7 @@ ${n.imagen ? `<meta name="twitter:image" content="${esc(n.imagen)}">` : ''}
   .nota-titulo{font-family:'Lora',serif;font-size:clamp(1.8rem,4vw,2.6rem);font-weight:700;color:var(--azul);line-height:1.2;margin-bottom:0.6rem}
   .nota-bajada{font-size:1.05rem;color:var(--muted);line-height:1.6;margin-bottom:0.8rem;font-style:italic;border-left:3px solid var(--bordo);padding-left:1rem}
   .nota-meta{font-size:0.78rem;color:#aaa;margin-bottom:1.8rem;padding-bottom:1.4rem;border-bottom:1px solid var(--gris)}
-  .nota-cuerpo{font-size:1.05rem;line-height:1.85;color:#333;white-space:pre-wrap}
+  .nota-cuerpo{font-size:1.05rem;line-height:1.85;color:#333;white-space:pre-wrap;text-align:justify}
   footer{border-top:1px solid var(--gris);text-align:center;padding:1.5rem;font-size:0.72rem;color:#bbb;letter-spacing:0.1em;text-transform:uppercase;margin-top:3rem}
   footer span{color:var(--bordo)}
 </style>
@@ -335,16 +339,27 @@ ${n.imagen ? `<meta name="twitter:image" content="${esc(n.imagen)}">` : ''}
     if (!titulo) { alert('El título es obligatorio.'); return; }
 
     const btn = document.getElementById('btn-publicar');
-    btn.disabled = true; btn.textContent = 'Publicando...';
+    btn.disabled = true;
+
+    const esEdicion = editandoSlug !== null;
+    btn.textContent = esEdicion ? 'Guardando cambios...' : 'Publicando...';
 
     try {
       const { sha, noticias } = await fetchNoticiasAPI();
-      let slug = generarSlug(titulo);
-      if (!slug) slug = 'nota_' + Date.now();
-      if (noticias.some(n => n.slug === slug)) slug += '_' + Date.now().toString().slice(-4);
 
-      let imgUrl = '';
-      if (tieneImagen) {
+      let slug, notaExistente, imgUrl = '';
+
+      if (esEdicion) {
+        slug = editandoSlug;
+        notaExistente = noticias.find(n => n.slug === slug);
+        imgUrl = notaExistente.imagen || '';
+      } else {
+        slug = generarSlug(titulo);
+        if (!slug) slug = 'nota_' + Date.now();
+        if (noticias.some(n => n.slug === slug)) slug += '_' + Date.now().toString().slice(-4);
+      }
+
+      if (tieneImagen && !preview.src.startsWith('http')) {
         btn.textContent = 'Subiendo imagen...';
         const dataUrl = preview.src;
         const imgB64 = dataUrl.split(',')[1];
@@ -353,28 +368,80 @@ ${n.imagen ? `<meta name="twitter:image" content="${esc(n.imagen)}">` : ''}
       }
 
       btn.textContent = 'Generando página...';
-      const nota = { id: Date.now(), slug, titulo, bajada, cuerpo, imagen: imgUrl };
+      const nota = {
+        id: esEdicion ? notaExistente.id : Date.now(),
+        slug,
+        titulo,
+        bajada,
+        cuerpo,
+        imagen: imgUrl
+      };
       const htmlNota = generarHtmlNota(nota);
-      await apiPut(`notas/${slug}.html`, encodeB64(htmlNota), null, 'Nota: ' + titulo);
+      await apiPut(`notas/${slug}.html`, encodeB64(htmlNota), null, esEdicion ? 'Actualizar: ' + titulo : 'Nota: ' + titulo);
 
       btn.textContent = 'Guardando...';
-      noticias.unshift(nota);
+      if (esEdicion) {
+        const idx = noticias.findIndex(n => n.slug === slug);
+        if (idx !== -1) noticias[idx] = nota;
+      } else {
+        noticias.unshift(nota);
+      }
       await guardarNoticiasAPI(noticias, sha);
 
-      document.getElementById('inp-titulo').value = '';
-      document.getElementById('inp-bajada').value = '';
-      document.getElementById('inp-cuerpo').value = '';
-      document.getElementById('inp-imagen').value = '';
-      preview.style.display = 'none';
-      document.getElementById('upload-texto').textContent = 'Hacé clic para subir una imagen';
-      document.getElementById('slug-display').textContent = 'Se genera del título...';
-
+      limpiarFormulario();
       renderLista();
-      alert('¡Nota publicada!\nLink: ' + BASE_URL + '/notas/' + slug + '.html');
+      alert(esEdicion ? '¡Nota actualizada!' : '¡Nota publicada!\nLink: ' + BASE_URL + '/notas/' + slug + '.html');
     } catch(e) {
       alert('Error al publicar: ' + e.message);
     }
-    btn.disabled = false; btn.textContent = 'Publicar nota';
+    btn.disabled = false;
+    btn.textContent = esEdicion ? 'Guardar cambios' : 'Publicar nota';
+  }
+
+  function limpiarFormulario() {
+    editandoSlug = null;
+    document.getElementById('form-titulo').textContent = 'Nueva nota';
+    document.getElementById('inp-titulo').value = '';
+    document.getElementById('inp-bajada').value = '';
+    document.getElementById('inp-cuerpo').value = '';
+    document.getElementById('inp-imagen').value = '';
+    document.getElementById('upload-preview').style.display = 'none';
+    document.getElementById('upload-texto').textContent = 'Hacé clic para subir una imagen';
+    document.getElementById('slug-display').textContent = 'Se genera del título...';
+    document.getElementById('btn-publicar').textContent = 'Publicar nota';
+    document.getElementById('btn-cancelar').style.display = 'none';
+  }
+
+  function cancelarEdicion() {
+    if (confirm('¿Cancelar la edición?')) limpiarFormulario();
+  }
+
+  async function editar(slug) {
+    try {
+      const { noticias } = await fetchNoticiasAPI();
+      const nota = noticias.find(n => n.slug === slug);
+      if (!nota) { alert('Nota no encontrada'); return; }
+
+      editandoSlug = slug;
+      document.getElementById('form-titulo').textContent = 'Editar nota';
+      document.getElementById('inp-titulo').value = nota.titulo;
+      document.getElementById('inp-bajada').value = nota.bajada || '';
+      document.getElementById('inp-cuerpo').value = nota.cuerpo || '';
+      document.getElementById('slug-display').textContent = BASE_URL + '/notas/' + slug + '.html';
+      document.getElementById('btn-publicar').textContent = 'Guardar cambios';
+      document.getElementById('btn-cancelar').style.display = 'block';
+
+      if (nota.imagen) {
+        const preview = document.getElementById('upload-preview');
+        preview.src = nota.imagen;
+        preview.style.display = 'block';
+        document.getElementById('upload-texto').textContent = 'Imagen actual';
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch(e) {
+      alert('Error al cargar nota: ' + e.message);
+    }
   }
 
   async function borrar(slug) {
@@ -447,7 +514,10 @@ ${n.imagen ? `<meta name="twitter:image" content="${esc(n.imagen)}">` : ''}
             </div>
           </div>
           ${n.imagen ? `<img class="nota-item-thumb" src="${esc(n.imagen)}" alt="">` : ''}
-          <button class="btn-borrar-nota" onclick="borrar('${n.slug}')" title="Eliminar">×</button>
+          <div class="nota-item-actions">
+            <button class="btn-editar-nota" onclick="editar('${n.slug}')" title="Editar">✎</button>
+            <button class="btn-borrar-nota" onclick="borrar('${n.slug}')" title="Eliminar">×</button>
+          </div>
         </div>
       `).join('');
     } catch(e) {
