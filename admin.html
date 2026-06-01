@@ -363,7 +363,15 @@ ${n.imagen ? `<meta name="twitter:image" content="${esc(n.imagen)}">` : ''}
         btn.textContent = 'Subiendo imagen...';
         const dataUrl = preview.src;
         const imgB64 = dataUrl.split(',')[1];
-        await apiPut(`img/${slug}.jpg`, imgB64, null, 'Imagen: ' + slug);
+
+        // Si es edición, obtener el SHA de la imagen existente
+        let imgSha = null;
+        if (esEdicion) {
+          const imgFile = await apiGet(`img/${slug}.jpg`);
+          if (imgFile) imgSha = imgFile.sha;
+        }
+
+        await apiPut(`img/${slug}.jpg`, imgB64, imgSha, 'Imagen: ' + slug);
         imgUrl = BASE_URL + '/img/' + slug + '.jpg';
       }
 
@@ -377,7 +385,15 @@ ${n.imagen ? `<meta name="twitter:image" content="${esc(n.imagen)}">` : ''}
         imagen: imgUrl
       };
       const htmlNota = generarHtmlNota(nota);
-      await apiPut(`notas/${slug}.html`, encodeB64(htmlNota), null, esEdicion ? 'Actualizar: ' + titulo : 'Nota: ' + titulo);
+
+      // Si es edición, obtener el SHA del archivo HTML existente
+      let htmlSha = null;
+      if (esEdicion) {
+        const htmlFile = await apiGet(`notas/${slug}.html`);
+        if (htmlFile) htmlSha = htmlFile.sha;
+      }
+
+      await apiPut(`notas/${slug}.html`, encodeB64(htmlNota), htmlSha, esEdicion ? 'Actualizar: ' + titulo : 'Nota: ' + titulo);
 
       btn.textContent = 'Guardando...';
       if (esEdicion) {
