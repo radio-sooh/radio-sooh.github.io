@@ -66,6 +66,8 @@
   .nota-item-meta { font-size: 0.7rem; color: #aaa; }
   .nota-item-meta a { color: var(--azul-mid); text-decoration: none; }
   .nota-item-meta a:hover { text-decoration: underline; }
+  .nota-visitas { font-size: 0.7rem; color: #666; margin-top: 0.2rem; display: flex; align-items: center; gap: 0.3rem; }
+  .nota-visitas svg { width: 12px; height: 12px; opacity: 0.6; }
   .nota-item-thumb { width: 52px; height: 36px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--gris); }
   .nota-item-actions { display: flex; gap: 0.3rem; flex-shrink: 0; }
   .btn-editar-nota, .btn-borrar-nota { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1rem; padding: 2px 5px; transition: color 0.2s; line-height: 1; }
@@ -296,6 +298,9 @@ ${n.imagen ? `<meta name="twitter:image" content="${esc(n.imagen)}">` : ''}
   <div class="nota-cuerpo">${esc(n.cuerpo)}</div>
 </main>
 <footer><span>Radio Sooh</span> &nbsp;·&nbsp; Misiones, Argentina</footer>
+<script>
+fetch('https://api.countapi.xyz/hit/radiosooh/${n.slug}').catch(()=>{});
+</script>
 </body>
 </html>`;
   }
@@ -512,6 +517,16 @@ ${n.imagen ? `<meta name="twitter:image" content="${esc(n.imagen)}">` : ''}
     renderLista();
   }
 
+  async function obtenerVisitas(slug) {
+    try {
+      const res = await fetch(`https://api.countapi.xyz/get/radiosooh/${slug}`);
+      const data = await res.json();
+      return data.value || 0;
+    } catch(e) {
+      return 0;
+    }
+  }
+
   async function renderLista() {
     const cont = document.getElementById('lista-notas');
     const badge = document.getElementById('badge-total');
@@ -520,13 +535,19 @@ ${n.imagen ? `<meta name="twitter:image" content="${esc(n.imagen)}">` : ''}
       const { noticias } = await fetchNoticiasAPI();
       badge.textContent = noticias.length;
       if (noticias.length === 0) { cont.innerHTML = '<p class="lista-empty">Sin notas publicadas todavía.</p>'; return; }
+
+      // Renderizar sin visitas primero (más rápido)
       cont.innerHTML = noticias.map(n => `
-        <div class="nota-item">
+        <div class="nota-item" data-slug="${n.slug}">
           <div class="nota-item-info">
             <div class="nota-item-titulo">${esc(n.titulo)}</div>
             <div class="nota-item-meta">
               ${formatFecha(n.id)} &nbsp;·&nbsp;
               <a href="../notas/${n.slug}.html" target="_blank">${n.slug}</a>
+            </div>
+            <div class="nota-visitas">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <span id="visitas-${n.slug}">...</span>
             </div>
           </div>
           ${n.imagen ? `<img class="nota-item-thumb" src="${esc(n.imagen)}" alt="">` : ''}
@@ -536,6 +557,13 @@ ${n.imagen ? `<meta name="twitter:image" content="${esc(n.imagen)}">` : ''}
           </div>
         </div>
       `).join('');
+
+      // Cargar visitas en segundo plano
+      noticias.forEach(async n => {
+        const visitas = await obtenerVisitas(n.slug);
+        const elem = document.getElementById(`visitas-${n.slug}`);
+        if (elem) elem.textContent = visitas + ' visitas';
+      });
     } catch(e) {
       cont.innerHTML = `<p class="lista-empty" style="color:var(--bordo-light)">Error: ${e.message}</p>`;
     }
